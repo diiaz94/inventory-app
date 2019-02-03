@@ -24,7 +24,7 @@ Ext.define('Inventory.view.ActionsGrid', {
 	}, {
 		xtype: 'button',
 		text: 'Editar',
-		itemId: 'update',
+		itemId: 'edit',
 		hidden: true,
 	}, {
 		xtype: 'button',

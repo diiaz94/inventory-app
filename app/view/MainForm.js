@@ -1,11 +1,11 @@
-Ext.define('Inventory.view.ProductsForm', {
+Ext.define('Inventory.view.MainForm', {
 	extend: 'Ext.window.Window',
-	alias: 'widget.productsform',
+	alias: 'widget.mainform',
 
 	height: 150,
 	width: 300,
 	layout: 'fit',
-	title: 'Editar/Crear Productos',
+	title: '',
 	autoShow: true,
 	bodyBorder: false,
 	items: [{
@@ -15,12 +15,7 @@ Ext.define('Inventory.view.ProductsForm', {
 		border: false,
 		defaults: {
 			anchor: '100%'
-		},
-		items: [{
-			xtype: 'textfield',
-			name: 'name',
-			fieldLabel: 'Nombre'
-		}]
+		}
 	}],
 
 	dockedItems: [{
@@ -37,7 +32,8 @@ Ext.define('Inventory.view.ProductsForm', {
 			itemId: 'cancel'
 		}, {
 			xtype: 'button',
-			text: 'Guardar'
+			text: 'Guardar',
+			itemId: 'save'
 		}]
 	}]
 });

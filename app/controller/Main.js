@@ -40,6 +40,28 @@ const ModelsGridConfig = {
 	}]
 }
 
+const FieldsFormConfig = {
+	Products: [{
+		xtype: 'textfield',
+		name: 'name',
+		fieldLabel: 'Nombre'
+	}],
+	Providers: [{
+		xtype: 'textfield',
+		name: 'name',
+		fieldLabel: 'Nombre'
+	}],
+	Stores: [{
+		xtype: 'textfield',
+		name: 'name',
+		fieldLabel: 'Nombre'
+	}, {
+		xtype: 'textfield',
+		name: 'address',
+		fieldLabel: 'Dirección'
+	}]
+}
+
 Ext.define('Inventory.controller.Main', {
 	extend: 'Ext.app.Controller',
 
@@ -60,20 +82,32 @@ Ext.define('Inventory.controller.Main', {
 	views: [
 		// TODO: add view here
 		'Inventory.view.MainGrid',
-		'Inventory.view.ProductsForm'
+		'Inventory.view.MainForm'
 	],
 
 	init: function(application) {
 		this.control({
-			"combobox": {
+			"comboboxentities combobox": {
 				render: this.onComboboxRender,
 				change: this.onSelectEntity
 			},
-			"grid": {
+			"maingrid grid": {
 				selectionchange: this.onSelectionGridChange
 			},
 			"actionsgrid button#add": {
 				click: this.onAddClick
+			},
+			"actionsgrid button#edit": {
+				click: this.onEditClick
+			},
+			"actionsgrid button#delete": {
+				click: this.onDeleteClick
+			},
+			"mainform button#cancel": {
+				click: this.onCancelClick
+			},
+			"mainform button#save": {
+				click: this.onSaveClick
 			}
 		});
 	},
@@ -82,7 +116,6 @@ Ext.define('Inventory.controller.Main', {
 		Ext.ComponentQuery.query('actionsgrid')[0].setVisible(true); //show action buttons
 	},
 	onSelectEntity: function(el, newValue, oldValue, eOpts) {
-
 		var grid = Ext.ComponentQuery.query('maingrid grid')[0];
 		var combobox = Ext.ComponentQuery.query("combobox")[0];
 		var pager = Ext.ComponentQuery.query('pagingtoolbar')[0];
@@ -97,25 +130,82 @@ Ext.define('Inventory.controller.Main', {
 	},
 	onSelectionGridChange: function(el, selected, eOpts) {
 		var addBtn = Ext.ComponentQuery.query('actionsgrid #add')[0];
-		var updateBtn = Ext.ComponentQuery.query('actionsgrid #update')[0];
+		var updateBtn = Ext.ComponentQuery.query('actionsgrid #edit')[0];
 		var deleteBtn = Ext.ComponentQuery.query('actionsgrid #delete')[0];
 		addBtn.setVisible(selected.length == 0);
 		updateBtn.setVisible(selected.length == 1);
 		deleteBtn.setVisible(selected.length > 0);
-
-
 	},
 	onAddClick: function(btn, e, eOpts) {
-		console.log("clicked");
-		Ext.create('Inventory.view.ProductsForm');
+		var combobox = Ext.ComponentQuery.query("combobox")[0];
+		var win = Ext.create('Inventory.view.MainForm');
+		win.setTitle("Crear nuevo registro");
+		var form = win.down('form');
+		FieldsFormConfig[combobox.getValue()].forEach(function(element) {
+			form.add(element);
+		});
 	},
+	onEditClick: function(btn, e, eOpts) {
+		var combobox = Ext.ComponentQuery.query("combobox")[0];
+		var win = Ext.create('Inventory.view.MainForm');
+		win.setTitle("Editar registro");
+		var grid = Ext.ComponentQuery.query('maingrid grid')[0];
+		var record = grid.getSelectionModel().getLastSelected();
+		var form = win.down('form');
+		FieldsFormConfig[combobox.getValue()].forEach(function(element) {
+			form.add(element);
+		});
+		form.loadRecord(record);
+	},
+	onDeleteClick: function(btn, e, eOpts) {
+		Ext.Msg.show({
+			title: 'Confirmación',
+			msg: '¿Estás seguro/a que quieres eliminar los elementos seleccionados?',
+			buttonText: {
+				yes: "Si",
+				no: "No",
+				cancel: "Cancelar"
+			},
+			icon: Ext.Msg.QUESTION,
+			fn: function(r) {
+				if (r == "yes") {
+					var grid = Ext.ComponentQuery.query('maingrid grid')[0];
+					var records = grid.getSelectionModel().getSelection();
+					var store = grid.getStore();
+					var goToPreviusPage = records.length == grid.getSelectionModel().getRowsVisible();
+					store.remove(records);
+					store.sync();
+					if (goToPreviusPage) {
+						store.previousPage();
+					}
+				}
+			}
+		});
+	},
+	onCancelClick: function(btn, e, eOpts) {
+		var win = btn.up('window');
+		var form = win.down('form');
+		form.getForm().reset();
+		win.close();
+	},
+	onSaveClick: function(btn, e, eOpts) {
+		var grid = Ext.ComponentQuery.query('maingrid grid')[0];
+		var pager = grid.down('pagingtoolbar');
+		var store = grid.getStore();
+		var win = btn.up('window');
+		var form = win.down('form');
 
-	hideActions: function() {
-		Ext.ComponentQuery.query('actionsgrid #add')[0].setVisible(false);
-		Ext.ComponentQuery.query('actionsgrid #update')[0].setVisible(false);
-	},
-	showActions: function() {
-		Ext.ComponentQuery.query('actionsgrid #add')[0].setVisible(true);
-		Ext.ComponentQuery.query('actionsgrid #update')[0].setVisible(true);
+		var record = form.getRecord();
+		if (record) {
+			record.set(form.getValues());
+		} else {
+			var record = Ext.create(store.model.$className, form.getValues());
+			store.insert(0, record);
+
+		}
+		store.sync();
+		form.getForm().reset();
+		win.close();
 	}
+
 });

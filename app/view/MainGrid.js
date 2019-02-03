@@ -13,7 +13,7 @@ Ext.define('Inventory.view.MainGrid', {
 		columns: [],
 		title: 'test',
 		viewConfig: {
-			emptyText: 'Click a button to show a dataset',
+			emptyText: 'Oprime el botón crear para añadir datos',
 			deferEmptyText: false
 		},
 		dockedItems: [{

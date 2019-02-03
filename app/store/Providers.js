@@ -12,6 +12,10 @@ Ext.define('Inventory.store.Providers', {
 			type: 'json',
 			root: 'data',
 			totalProperty: 'total'
+		},
+		writer: {
+			type: 'json',
+			writeAllFields: false
 		}
 	},
 	autoSync: false

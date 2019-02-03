@@ -1,6 +1,6 @@
 Ext.define('Inventory.model.Provider', {
 	extend: 'Ext.data.Model',
-
+	idProperty: "_id",
 	fields: [{
 		name: '_id',
 		type: 'string'
